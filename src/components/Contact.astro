@@ -1,8 +1,8 @@
 ---
 const links = [
-  { label: "email →", href: "mailto:deine@email.de", primary: true },
-  { label: "github", href: "https://github.com/MrxTS", primary: false },
-  { label: "linkedin", href: "https://linkedin.com/in/dein-profil", primary: false },
+  { label: "email →", href: "mailto:deine@email.de", primary: true, external: false },
+  { label: "github", href: "https://github.com/MrxTS", primary: false, external: true },
+  { label: "linkedin", href: "https://linkedin.com/in/dein-profil", primary: false, external: true },
 ];
 ---
 
@@ -11,7 +11,7 @@ const links = [
   <p class="text">Interesse? Schreib mir gerne.</p>
   <div class="links">
     {links.map((l) => (
-      <a href={l.href} class={l.primary ? "btn-primary" : "btn-secondary"} target="_blank" rel="noopener noreferrer">
+      <a href={l.href} class={l.primary ? "btn-primary" : "btn-secondary"} {...l.external ? { target: "_blank", rel: "noopener noreferrer" } : {}}>
         {l.label}
       </a>
     ))}
