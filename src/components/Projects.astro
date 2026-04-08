@@ -1,0 +1,100 @@
+---
+interface Project {
+  name: string;
+  description: string;
+  accent: string;
+  url?: string;
+}
+
+const projects: Project[] = [
+  {
+    name: "Forge",
+    description: "iOS Habit Tracker · Swift · Supabase",
+    accent: "var(--accent-blue)",
+    url: "https://github.com/MrxTS/forge",
+  },
+  {
+    name: "Sproutly",
+    description: "iOS Baby Tracker · Swift · Supabase",
+    accent: "var(--accent-green)",
+    url: "https://github.com/MrxTS/Sproutly",
+  },
+  {
+    name: "Homelab",
+    description: "Pi + NAS · Docker · Monitoring · WireGuard",
+    accent: "var(--accent-red)",
+  },
+  {
+    name: "pixal-grub",
+    description: "GRUB Theme · pixel-emerald",
+    accent: "var(--accent-purple)",
+    url: "https://github.com/MrxTS/pixal-grub",
+  },
+];
+---
+
+<section id="projects">
+  <span class="comment">// projects</span>
+  <div class="grid">
+    {projects.map((p) =>
+      p.url ? (
+        <a href={p.url} class="card" target="_blank" rel="noopener noreferrer" style={`--accent: ${p.accent}`}>
+          <span class="name">{p.name}</span>
+          <span class="desc">{p.description}</span>
+        </a>
+      ) : (
+        <div class="card" style={`--accent: ${p.accent}`}>
+          <span class="name">{p.name}</span>
+          <span class="desc">{p.description}</span>
+        </div>
+      )
+    )}
+  </div>
+</section>
+
+<style>
+  section {
+    padding: 2.5rem 2rem;
+    border-bottom: 1px solid var(--border);
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+  .comment {
+    color: var(--text-subdued);
+    font-size: 0.7rem;
+    display: block;
+    margin-bottom: 0.75rem;
+    letter-spacing: 0.05em;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border-subtle);
+    border-top: 2px solid var(--accent);
+    border-radius: 6px;
+    padding: 0.9rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    text-decoration: none;
+    transition: border-color 0.15s;
+  }
+  a.card:hover { border-color: var(--accent); }
+  .name {
+    color: var(--text-primary);
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+  .desc {
+    color: var(--text-secondary);
+    font-size: 0.72rem;
+    line-height: 1.5;
+  }
+  @media (max-width: 600px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+</style>
