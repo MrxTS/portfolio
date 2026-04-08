@@ -1,0 +1,71 @@
+---
+interface Category {
+  label: string;
+  color: string;
+  skills: string[];
+}
+
+const categories: Category[] = [
+  {
+    label: "testing",
+    color: "var(--accent-green)",
+    skills: ["k6", "Postman", "Appium", "GitLab CI"],
+  },
+  {
+    label: "development",
+    color: "var(--accent-blue)",
+    skills: ["Swift", "SwiftUI", "Supabase", "Java"],
+  },
+  {
+    label: "infrastructure & observability",
+    color: "var(--accent-red)",
+    skills: ["Docker", "OpenShift", "Kibana", "Elasticsearch", "Linux", "Grafana"],
+  },
+];
+---
+
+<section id="skills">
+  <span class="comment">// skills</span>
+  <div class="categories">
+    {categories.map((cat) => (
+      <div class="category">
+        <span class="label" style={`color: ${cat.color}`}>{cat.label}</span>
+        <div class="tags">
+          {cat.skills.map((skill) => (
+            <span class="tag" style={`color: ${cat.color}`}>{skill}</span>
+          ))}
+        </div>
+      </div>
+    ))}
+  </div>
+</section>
+
+<style>
+  section {
+    padding: 2.5rem 2rem;
+    border-bottom: 1px solid var(--border);
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+  .comment {
+    color: var(--text-subdued);
+    font-size: 0.7rem;
+    display: block;
+    margin-bottom: 0.75rem;
+    letter-spacing: 0.05em;
+  }
+  .categories { display: flex; flex-direction: column; gap: 1rem; }
+  .label {
+    font-size: 0.65rem;
+    display: block;
+    margin-bottom: 0.4rem;
+  }
+  .tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .tag {
+    background: var(--surface);
+    border: 1px solid var(--border-subtle);
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.68rem;
+  }
+</style>
