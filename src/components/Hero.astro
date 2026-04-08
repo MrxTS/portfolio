@@ -1,0 +1,82 @@
+---
+---
+<section id="hero">
+  <span class="comment">// hello world</span>
+  <h1>Hi, ich bin <span class="blue">Kamui</span></h1>
+  <p class="roles">
+    <span class="green">Software Test Engineer</span>
+    <span class="sep"> &amp; </span>
+    <span class="purple">iOS Developer</span>
+  </p>
+  <blockquote>
+    Ich teste Software professionell und baue nebenbei iOS-Apps und einen
+    self-hosted Homelab. Ich mag es, Systeme zu verstehen — von innen.
+  </blockquote>
+  <div class="cta">
+    <a href="#projects" class="btn-primary">projects →</a>
+    <a href="https://github.com/MrxTS" class="btn-secondary" target="_blank" rel="noopener noreferrer">github</a>
+  </div>
+</section>
+
+<style>
+  section {
+    padding: 3rem 2rem;
+    border-bottom: 1px solid var(--border);
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+  .comment {
+    color: var(--text-subdued);
+    font-size: 0.75rem;
+    display: block;
+    margin-bottom: 1rem;
+  }
+  h1 {
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+  }
+  .blue   { color: var(--accent-blue); }
+  .green  { color: var(--accent-green); }
+  .purple { color: var(--accent-purple); }
+  .sep    { color: var(--text-subdued); }
+  .roles {
+    font-size: 0.9rem;
+    margin-bottom: 1.25rem;
+  }
+  blockquote {
+    border-left: 2px solid var(--border-subtle);
+    padding-left: 1rem;
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    line-height: 1.8;
+    max-width: 480px;
+    margin-bottom: 1.5rem;
+  }
+  .cta { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+  .btn-primary {
+    background: var(--accent-blue);
+    color: var(--bg);
+    padding: 0.4rem 1rem;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.78rem;
+    font-weight: 700;
+    transition: opacity 0.15s;
+  }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-secondary {
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    padding: 0.4rem 1rem;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.78rem;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .btn-secondary:hover {
+    color: var(--text-primary);
+    border-color: var(--text-subdued);
+  }
+</style>
