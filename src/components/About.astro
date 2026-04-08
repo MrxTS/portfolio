@@ -1,0 +1,69 @@
+---
+---
+<section id="about">
+  <span class="comment">// about me</span>
+  <div class="grid">
+    <p class="bio">
+      QA-Profi am Tag, iOS-Entwickler und Homelab-Tinkerer in der Freizeit.
+      Ich interessiere mich dafür wie Systeme funktionieren — ob Software,
+      Hardware oder Netzwerk.
+    </p>
+    <div class="facts">
+      <span class="facts-label">quick facts</span>
+      <ul>
+        <li>📍 Deutschland</li>
+        <li>🧪 Test Engineer</li>
+        <li>📱 iOS Developer</li>
+        <li>🖥️ Self-Hoster</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  section {
+    padding: 2.5rem 2rem;
+    border-bottom: 1px solid var(--border);
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+  .comment {
+    color: var(--text-subdued);
+    font-size: 0.7rem;
+    display: block;
+    margin-bottom: 0.75rem;
+    letter-spacing: 0.05em;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    align-items: start;
+  }
+  .bio {
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    line-height: 1.8;
+  }
+  .facts {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1rem;
+  }
+  .facts-label {
+    color: var(--accent-green);
+    font-size: 0.65rem;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+  ul { list-style: none; }
+  li {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    line-height: 2.1;
+  }
+  @media (max-width: 600px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+</style>
