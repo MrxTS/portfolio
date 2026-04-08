@@ -26,3 +26,6 @@ pnpm-debug.log*
 
 # editor settings
 .vscode/
+
+# claude instructions (lokal)
+CLAUDE.md
