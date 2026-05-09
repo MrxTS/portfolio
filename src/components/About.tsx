@@ -17,7 +17,7 @@ export default function About() {
             segments={[
               { text: "I am Stefan Nguyen,", className: "font-normal" },
               {
-                text: "a self-taught engineer.",
+                text: "a self-taught developer.",
                 className: "italic font-serif",
               },
               {
