@@ -1,43 +1,63 @@
-# Astro Starter Kit: Minimal
+# portfolio.stng.dev
 
-```sh
-npm create astro@latest -- --template minimal
+Personal developer portfolio — cinematic dark, hero video background, framer-motion typography. Live at [portfolio.stng.dev](https://portfolio.stng.dev).
+
+## Stack
+
+- **Astro 6** static site with **React 19** islands (`@astrojs/react`)
+- **Tailwind v4** via `@tailwindcss/vite` — CSS-first config in `src/styles/global.css`
+- **framer-motion** — pull-up text, scroll-linked letter opacity, `prefers-reduced-motion` aware
+- **lucide-react** — icon set (Flame, Sprout, Server, Check, ArrowRight)
+- Self-hosted **Almarai** + **Instrument Serif** as `woff2` (DSGVO, no Google Fonts CDN)
+- Self-hosted hero video (`+faststart`, no audio, ~1.4 MB)
+- Hosted on **Cloudflare Pages**
+
+## Structure
+
+```
+src/
+├── layouts/Layout.astro              HTML shell, OG/Twitter, JSON-LD Person, font preload
+├── styles/global.css                 Tailwind v4 @import, @theme, @font-face, noise utils
+├── components/
+│   ├── Hero.tsx                      island — video BG, navbar pill, "Curious*" title
+│   ├── About.tsx                     island — multi-style pull-up + scroll-linked letters
+│   ├── Features.tsx                  island — terminal card + Forge / Sproutly / Homelab
+│   ├── Skills.astro                  static — tag grid, 3 categories
+│   ├── Contact.astro                 static — email pill + GitHub + LinkedIn
+│   └── animations/
+│       ├── WordsPullUp.tsx
+│       ├── WordsPullUpMultiStyle.tsx
+│       └── AnimatedLetter.tsx
+└── pages/index.astro
+public/
+├── favicon.svg / favicon.ico
+├── fonts/*.woff2                     5 files, ~93 KB total
+├── og-image.jpg                      1200×630, extracted from hero video
+├── robots.txt + sitemap.xml
+└── videos/hero.mp4
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## Commands
 
-## 🚀 Project Structure
+| Command            | Action                                       |
+| :----------------- | :------------------------------------------- |
+| `npm install`      | Install dependencies (Node ≥ 22.12)          |
+| `npm run dev`      | Dev server at `localhost:4321` with HMR      |
+| `npm run build`    | Production build → `./dist/`                 |
+| `npm run preview`  | Preview the production build locally         |
+| `npx astro check`  | TypeScript + Astro diagnostics               |
 
-Inside of your Astro project, you'll see the following folders and files:
+## Deployment
 
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
+```
+git push (Gitea master) → mirror to GitHub → Cloudflare Pages auto-build → live (~1 min)
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+Only pushes to `master` trigger a Cloudflare build. Feature branches stay local until merged.
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+## A11y & Performance
 
-Any static assets, like images, can be placed in the `public/` directory.
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+- `<MotionConfig reducedMotion="user">` in every React island — animations resolve instantly when the OS sets `prefers-reduced-motion`
+- Hero `<video>` autoplay disabled under reduced motion; `poster="/og-image.jpg"` as fallback
+- Almarai-400 preloaded (above-the-fold critical), all fonts use `font-display: swap`
+- JSON-LD `Person` schema, OG/Twitter meta, canonical URL, static sitemap + robots
