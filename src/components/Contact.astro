@@ -1,61 +1,62 @@
 ---
 const links = [
-  { label: "email →", href: "mailto:stng.dev@proton.me", primary: true, external: false },
-  { label: "github", href: "https://github.com/MrxTS", primary: false, external: true },
-  { label: "linkedin", href: "https://www.linkedin.com/in/stefan-nguyen-025776135/", primary: false, external: true },
+  {
+    label: "stng.dev@proton.me",
+    href: "mailto:stng.dev@proton.me",
+    primary: true,
+    external: false,
+  },
+  {
+    label: "GitHub",
+    href: "https://github.com/MrxTS",
+    primary: false,
+    external: true,
+  },
+  {
+    label: "LinkedIn",
+    href: "https://www.linkedin.com/in/stefan-nguyen-025776135/",
+    primary: false,
+    external: true,
+  },
 ];
 ---
+<section id="contact" class="bg-black px-4 py-20 md:py-28">
+  <div class="mx-auto max-w-6xl rounded-2xl bg-[#101010] px-6 py-16 text-center md:px-12 md:py-24">
+    <span class="text-[10px] uppercase tracking-[0.2em] text-primary sm:text-xs">
+      Contact
+    </span>
+    <h2 class="mt-6 text-3xl font-normal text-primary sm:text-4xl md:text-5xl lg:text-6xl leading-[0.95]">
+      Let’s build something <span class="font-serif italic">curious</span> together.
+    </h2>
+    <p class="mx-auto mt-6 max-w-xl text-xs text-gray-400 sm:text-sm md:text-base">
+      Open to QA-engineering roles, indie iOS collabs, and homelab geekery.
+      Drop a line below.
+    </p>
 
-<section id="contact">
-  <span class="comment">// contact</span>
-  <p class="text">Interesse? Schreib mir gerne.</p>
-  <div class="links">
-    {links.map((l) => (
-      <a href={l.href} class={l.primary ? "btn-primary" : "btn-secondary"} {...l.external ? { target: "_blank", rel: "noopener noreferrer" } : {}}>
-        {l.label}
-      </a>
-    ))}
+    <div class="mt-10 flex flex-wrap items-center justify-center gap-3">
+      {links.map((l) => (
+        l.primary ? (
+          <a
+            href={l.href}
+            class="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-medium text-black transition-opacity hover:opacity-90"
+          >
+            {l.label}
+          </a>
+        ) : (
+          <a
+            href={l.href}
+            target={l.external ? "_blank" : undefined}
+            rel={l.external ? "noopener noreferrer" : undefined}
+            class="inline-flex items-center gap-2 rounded-full border border-white/15 px-5 py-2 text-sm text-primary/80 transition-colors hover:border-white/40 hover:text-primary"
+          >
+            {l.label}
+          </a>
+        )
+      ))}
+    </div>
   </div>
-</section>
 
-<style>
-  section {
-    padding: 2.5rem 2rem;
-    max-width: var(--max-width);
-    margin: 0 auto;
-  }
-  .comment {
-    color: var(--text-subdued);
-    font-size: 0.7rem;
-    display: block;
-    margin-bottom: 0.75rem;
-    letter-spacing: 0.05em;
-  }
-  .text {
-    color: var(--text-secondary);
-    font-size: 0.82rem;
-    margin-bottom: 1.25rem;
-  }
-  .links { display: flex; gap: 0.75rem; flex-wrap: wrap; }
-  .btn-primary {
-    background: var(--accent-blue);
-    color: var(--bg);
-    padding: 0.4rem 1rem;
-    border-radius: 4px;
-    text-decoration: none;
-    font-size: 0.75rem;
-    font-weight: 700;
-    transition: opacity 0.15s;
-  }
-  .btn-primary:hover { opacity: 0.85; }
-  .btn-secondary {
-    border: 1px solid var(--border-subtle);
-    color: var(--text-secondary);
-    padding: 0.4rem 1rem;
-    border-radius: 4px;
-    text-decoration: none;
-    font-size: 0.75rem;
-    transition: color 0.15s;
-  }
-  .btn-secondary:hover { color: var(--text-primary); }
-</style>
+  <p class="mx-auto mt-12 max-w-6xl px-2 text-center text-[10px] uppercase tracking-[0.2em] text-gray-600 sm:text-xs">
+    © Stefan Nguyen
+  </p>
+</section>
