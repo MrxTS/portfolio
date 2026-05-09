@@ -1,24 +1,18 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import Nav from "../components/Nav.astro";
-import Hero from "../components/Hero.astro";
-import About from "../components/About.astro";
-import Projects from "../components/Projects.astro";
+import Hero from "../components/Hero";
+import About from "../components/About";
+import Features from "../components/Features";
 import Skills from "../components/Skills.astro";
 import Contact from "../components/Contact.astro";
 ---
 
 <Layout>
-  <Nav />
-  <main>
-    <Hero />
-    <About />
-    <Projects />
+  <main class="bg-black">
+    <Hero client:load />
+    <About client:visible />
+    <Features client:visible />
     <Skills />
     <Contact />
   </main>
 </Layout>
-
-<style>
-  main { width: 100%; }
-</style>
