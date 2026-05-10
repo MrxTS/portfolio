@@ -30,8 +30,8 @@ const CARDS: FeatureCard[] = [
       "Edge Functions for AI Coach",
       "Streaks, reminders, weekly recap",
     ],
-    href: "mailto:stng.dev@proton.me?subject=Forge%20%E2%80%94%20code%20request",
-    cta: "Private · request code",
+    href: "/projects/forge",
+    cta: "View details",
   },
   {
     number: "02",

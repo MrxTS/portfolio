@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <radialGradient id="vignette" cx="50%" cy="40%" r="80%">
+      <stop offset="0%" stop-color="#1a1a1a"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </radialGradient>
+    <filter id="noise" x="0" y="0">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" seed="3"/>
+      <feColorMatrix values="0 0 0 0 0.87  0 0 0 0 0.86  0 0 0 0 0.78  0 0 0 0.05 0"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#vignette)"/>
+  <rect width="1200" height="630" filter="url(#noise)" opacity="0.5"/>
+
+  <!-- top brand row -->
+  <text x="80" y="100" fill="#DEDBC8" opacity="0.55"
+        font-family="'Inter','Source Sans 3','DejaVu Sans',sans-serif"
+        font-size="20" letter-spacing="4">PROJECT · 03</text>
+  <text x="1120" y="100" fill="#DEDBC8" opacity="0.85" text-anchor="end"
+        font-family="serif" font-style="italic" font-size="36">stng.dev</text>
+
+  <!-- title -->
+  <text x="80" y="340" fill="#DEDBC8"
+        font-family="'Inter','Source Sans 3','DejaVu Sans',sans-serif"
+        font-size="180" font-weight="500" letter-spacing="-4">Homelab.</text>
+
+  <!-- subtitle -->
+  <text x="80" y="410" fill="#888"
+        font-family="'Inter','Source Sans 3','DejaVu Sans',sans-serif"
+        font-size="32" font-weight="400">Self-hosted production stack.</text>
+
+  <!-- chip row -->
+  <g font-family="'Inter','Source Sans 3','DejaVu Sans',sans-serif" font-size="22" fill="#DEDBC8">
+    <g>
+      <rect x="80" y="490" width="178" height="48" rx="24" fill="#212121" stroke="#ffffff15" stroke-width="1"/>
+      <text x="169" y="521" text-anchor="middle">MS-01 Proxmox</text>
+    </g>
+    <g>
+      <rect x="278" y="490" width="118" height="48" rx="24" fill="#212121" stroke="#ffffff15" stroke-width="1"/>
+      <text x="337" y="521" text-anchor="middle">21 LXCs</text>
+    </g>
+    <g>
+      <rect x="416" y="490" width="148" height="48" rx="24" fill="#212121" stroke="#ffffff15" stroke-width="1"/>
+      <text x="490" y="521" text-anchor="middle">Pi 4 backup</text>
+    </g>
+    <g>
+      <rect x="584" y="490" width="106" height="48" rx="24" fill="#212121" stroke="#ffffff15" stroke-width="1"/>
+      <text x="637" y="521" text-anchor="middle">DS224+</text>
+    </g>
+  </g>
+
+  <!-- bottom URL -->
+  <text x="80" y="595" fill="#666"
+        font-family="'JetBrains Mono','DejaVu Sans Mono',monospace"
+        font-size="18" letter-spacing="0.5">portfolio.stng.dev / projects / homelab</text>
+</svg>

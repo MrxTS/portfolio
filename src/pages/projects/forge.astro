@@ -1,0 +1,273 @@
+---
+import Layout from "../../layouts/Layout.astro";
+
+const stackApp = [
+  "iOS 17+",
+  "SwiftUI",
+  "@Observable",
+  "async/await",
+  "MVVM · Repository",
+  "StoreKit 2",
+];
+
+const stackBackend = [
+  "Supabase Postgres",
+  "Row-Level Security",
+  "pg_cron",
+  "pg_net",
+  "Vault",
+  "Edge Functions (Deno)",
+  "Claude Haiku 4.5",
+];
+
+const decisions = [
+  {
+    title: "Three categories, ten habits",
+    body:
+      "A CHECK-constraint and an enforce_habit_limit trigger keep the behaviour-change surface narrow. Atomic Habits' point is consistency over breadth — the schema enforces it.",
+  },
+  {
+    title: "Server-side trial tracking",
+    body:
+      "trial_started_at lives on profiles, set by trigger at signup. Survives reinstall, doesn't trust the client, no UserDefaults gaming.",
+  },
+  {
+    title: "RLS via SECURITY DEFINER helper",
+    body:
+      "is_habit_owner() lets every completion policy stay a one-liner. No recursive RLS, no per-table copy-paste, one place to audit.",
+  },
+  {
+    title: "Idempotent weekly digests",
+    body:
+      "The Edge Function uses Prefer: resolution=merge-duplicates on upsert. If pg_cron fires twice or a retry lands, the row gets replaced, never duplicated.",
+  },
+];
+
+const whatsNext = [
+  "Auth + onboarding",
+  "Habit CRUD with category caps",
+  "Completion toggle + streak heatmap",
+  "Chat with the digest (max 20/week, 150 words/reply)",
+  "Paywall + 30-day trial enforcement",
+  "Push reminders + TestFlight ramp",
+];
+
+const sundayLoop = `   Sunday 20:00 UTC
+         │
+         ▼
+   ┌──────────┐
+   │ pg_cron  │
+   └────┬─────┘
+        │ net.http_post + Bearer (vault)
+        ▼
+┌────────────────────┐
+│  Edge Function     │
+│  generate-weekly-  │
+│  digest (Deno)     │
+└─────────┬──────────┘
+          │ pull 4w of completions
+          ▼
+┌────────────────────┐
+│  Claude Haiku 4.5  │
+│  tips + 7 quotes   │
+└─────────┬──────────┘
+          │ upsert (idempotent)
+          ▼
+┌────────────────────┐
+│  ai_digests        │
+└────────────────────┘`;
+
+const cronSnippet = `-- Sundays at 20:00 UTC, fan out to the Edge Function
+-- with a service_role token kept encrypted in vault.
+select cron.schedule(
+  'forge-weekly-digest',
+  '0 20 * * 0',
+  $$
+  select net.http_post(
+    url := 'https://<project>.supabase.co/functions/v1/generate-weekly-digest',
+    headers := jsonb_build_object(
+      'Content-Type', 'application/json',
+      'Authorization', 'Bearer ' || (
+        select decrypted_secret
+        from vault.decrypted_secrets
+        where name = 'service_role_key'
+        limit 1
+      )
+    ),
+    body := '{}'::jsonb
+  );
+  $$
+);`;
+
+const rlsSnippet = `-- SECURITY DEFINER helper: check habit ownership
+-- without recursive RLS lookups.
+create or replace function is_habit_owner(p_habit_id uuid)
+returns boolean
+language sql
+security definer
+stable
+as $$
+  select exists(
+    select 1 from public.habits
+    where id = p_habit_id
+      and user_id = auth.uid()
+  );
+$$;
+
+-- Every completion mutation routes through it.
+create policy "completions: own rows"
+  on public.completions
+  for all using (
+    auth.uid() = user_id
+    and is_habit_owner(habit_id)
+  );`;
+---
+<Layout
+  title="Forge — Stefan Nguyen"
+  description="An iOS habit tracker with a Claude-powered coach. Supabase backend live: schema, RLS, Edge Function, pg_cron. iOS app waiting on hardware."
+  path="/projects/forge"
+  ogImage="/og-forge.jpg"
+>
+  <main class="relative bg-black">
+    <div class="bg-noise pointer-events-none absolute inset-0 opacity-[0.12]" />
+
+    <div class="relative mx-auto max-w-5xl px-4 py-12 md:py-20">
+      <a
+        href="/#features"
+        class="inline-flex items-center gap-2 text-xs text-primary/70 transition-colors hover:text-primary sm:text-sm"
+      >
+        ← back to portfolio
+      </a>
+
+      <header class="mt-12 md:mt-20">
+        <p class="text-xs uppercase tracking-[0.2em] text-gray-500">Project · 01</p>
+        <h1 class="mt-4 text-4xl font-normal leading-[1.05] text-primary sm:text-5xl md:text-6xl lg:text-7xl">
+          Forge.
+        </h1>
+        <p class="mt-6 max-w-2xl text-base text-gray-400 sm:text-lg md:text-xl">
+          An iOS habit tracker grounded in <span class="font-serif italic text-primary/90">Atomic Habits</span>,
+          with a Claude-powered coach that reads four weeks of your patterns every Sunday.
+        </p>
+        <div class="mt-6 flex flex-wrap gap-2">
+          <span class="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs text-emerald-300">
+            <span class="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+            Backend · live
+          </span>
+          <span class="inline-flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-400/10 px-3 py-1 text-xs text-amber-300">
+            <span class="h-1.5 w-1.5 rounded-full bg-amber-400" />
+            iOS · in spec
+          </span>
+        </div>
+      </header>
+
+      <section class="mt-16 md:mt-24">
+        <h2 class="text-xs uppercase tracking-[0.2em] text-gray-500">Stack</h2>
+        <div class="mt-6 grid grid-cols-1 gap-3 md:grid-cols-2">
+          <div class="rounded-2xl bg-[#101010] p-5">
+            <p class="text-[10px] uppercase tracking-[0.2em] text-amber-300/80">App · planned</p>
+            <div class="mt-3 flex flex-wrap gap-2">
+              {stackApp.map((item) => (
+                <span class="inline-flex items-center rounded-full border border-white/10 bg-[#212121] px-3 py-1 text-xs text-primary/80">
+                  {item}
+                </span>
+              ))}
+            </div>
+          </div>
+          <div class="rounded-2xl bg-[#101010] p-5">
+            <p class="text-[10px] uppercase tracking-[0.2em] text-emerald-300/80">Backend · live</p>
+            <div class="mt-3 flex flex-wrap gap-2">
+              {stackBackend.map((item) => (
+                <span class="inline-flex items-center rounded-full border border-white/10 bg-[#212121] px-3 py-1 text-xs text-primary/80">
+                  {item}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="mt-16 md:mt-24">
+        <h2 class="text-xs uppercase tracking-[0.2em] text-gray-500">The Sunday loop</h2>
+        <div class="mt-6 overflow-x-auto rounded-2xl bg-[#0a0a0a] p-5 md:p-7">
+          <pre class="font-mono text-[11px] leading-relaxed text-primary/80 sm:text-xs md:text-sm">{sundayLoop}</pre>
+        </div>
+        <p class="mt-6 max-w-3xl text-sm text-gray-400 md:text-base">
+          Every Sunday at 20:00 UTC, pg_cron walks each active user, hands four weeks of
+          completions to a Deno Edge Function, and asks Claude Haiku for personalised tips
+          plus a quote per weekday. Idempotent — re-runs replace, never duplicate. The cron
+          job authenticates itself with a service-role token pulled from Postgres' encrypted
+          vault, never plain SQL.
+        </p>
+        <div class="mt-6 overflow-x-auto rounded-2xl bg-[#0a0a0a] p-5 md:p-7">
+          <pre class="font-mono text-[11px] leading-relaxed text-primary/80 sm:text-xs md:text-sm">{cronSnippet}</pre>
+        </div>
+      </section>
+
+      <section class="mt-16 md:mt-24">
+        <h2 class="text-xs uppercase tracking-[0.2em] text-gray-500">Habit data, locked down</h2>
+        <p class="mt-4 max-w-3xl text-sm text-gray-400 md:text-base">
+          Every table runs under Row-Level Security. Completions are the trickiest case — a
+          user's claim to a row depends on owning the parent habit. Instead of duplicating
+          that lookup in every policy, it lives in one <code class="font-mono text-primary/80">SECURITY DEFINER</code>
+          helper. Audit surface: a single function, not five.
+        </p>
+        <div class="mt-6 overflow-x-auto rounded-2xl bg-[#0a0a0a] p-5 md:p-7">
+          <pre class="font-mono text-[11px] leading-relaxed text-primary/80 sm:text-xs md:text-sm">{rlsSnippet}</pre>
+        </div>
+      </section>
+
+      <section class="mt-16 md:mt-24">
+        <h2 class="text-xs uppercase tracking-[0.2em] text-gray-500">Decisions worth defending</h2>
+        <div class="mt-6 grid grid-cols-1 gap-3 md:grid-cols-2">
+          {decisions.map((d) => (
+            <div class="rounded-2xl bg-[#101010] p-6">
+              <h3 class="text-base font-medium text-primary md:text-lg">{d.title}</h3>
+              <p class="mt-3 text-sm text-gray-400 md:text-[15px]">{d.body}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section class="mt-16 md:mt-24">
+        <h2 class="text-xs uppercase tracking-[0.2em] text-gray-500">What's next</h2>
+        <p class="mt-4 max-w-3xl text-sm text-gray-400 md:text-base">
+          Plan B (iOS Core) ships the day a Mac lands on the desk. Spec lives in the vault;
+          here is the hand-off-ready feature list:
+        </p>
+        <ul class="mt-6 grid grid-cols-1 gap-2 sm:grid-cols-2">
+          {whatsNext.map((item) => (
+            <li class="flex items-start gap-3 rounded-xl bg-[#101010] px-4 py-3">
+              <span class="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400" />
+              <span class="text-sm text-gray-300">{item}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section class="mt-20 md:mt-28">
+        <div class="rounded-2xl bg-[#101010] px-6 py-12 text-center md:px-12 md:py-16">
+          <h2 class="text-2xl font-normal text-primary sm:text-3xl md:text-4xl leading-[1.05]">
+            Want the <span class="font-serif italic">backend</span> source?
+          </h2>
+          <p class="mx-auto mt-4 max-w-xl text-sm text-gray-400 md:text-base">
+            Schema, migrations, Edge Function, RLS — happy to walk through the live half.
+          </p>
+          <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <a
+              href="mailto:stng.dev@proton.me?subject=Forge%20%E2%80%94%20code%20request"
+              class="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-medium text-black transition-opacity hover:opacity-90"
+            >
+              Request walkthrough
+            </a>
+            <a
+              href="/#features"
+              class="inline-flex items-center gap-2 rounded-full border border-white/15 px-5 py-2 text-sm text-primary/80 transition-colors hover:border-white/40 hover:text-primary"
+            >
+              ← back to portfolio
+            </a>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+</Layout>

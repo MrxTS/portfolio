@@ -5,16 +5,18 @@ interface Props {
   title?: string;
   description?: string;
   path?: string;
+  ogImage?: string;
 }
 const {
   title = "Stefan Nguyen — Portfolio",
   description = "Software Test Engineer & iOS Developer building tools, tests, and self-hosted systems — driven by curiosity to understand how things work from the inside out.",
   path = "",
+  ogImage: ogImagePath = "/og-image.jpg",
 } = Astro.props;
 
 const siteUrl = "https://portfolio.stng.dev";
 const pageUrl = `${siteUrl}${path}`;
-const ogImage = `${siteUrl}/og-image.jpg`;
+const ogImage = `${siteUrl}${ogImagePath}`;
 const isRoot = path === "";
 ---
 <!DOCTYPE html>
