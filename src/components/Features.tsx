@@ -104,6 +104,15 @@ export default function Features() {
             <Card key={card.number} card={card} delay={(i + 1) * 0.15} />
           ))}
         </div>
+
+        <div className="mt-12 text-center md:mt-16">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-gray-500 sm:text-xs">
+            On the workbench
+          </p>
+          <p className="mx-auto mt-3 max-w-xl text-sm text-gray-400 md:text-base">
+            <span className="text-primary">Meadowlight</span> — a cozy pixel-idle game in Godot 4 for iOS and Android.
+          </p>
+        </div>
       </div>
     </section>
     </MotionConfig>
