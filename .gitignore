@@ -29,3 +29,8 @@ pnpm-debug.log*
 
 # claude instructions (lokal)
 CLAUDE.md
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
