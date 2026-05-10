@@ -16,6 +16,7 @@ interface FeatureCard {
   Icon: LucideIcon;
   items: string[];
   href?: string;
+  cta?: string;
 }
 
 const CARDS: FeatureCard[] = [
@@ -29,7 +30,8 @@ const CARDS: FeatureCard[] = [
       "Edge Functions for AI Coach",
       "Streaks, reminders, weekly recap",
     ],
-    href: "https://github.com/MrxTS/forge",
+    href: "mailto:stng.dev@proton.me?subject=Forge%20%E2%80%94%20code%20request",
+    cta: "Private · request code",
   },
   {
     number: "02",
@@ -40,7 +42,8 @@ const CARDS: FeatureCard[] = [
       "Real-time activity log",
       "Supabase backend with RLS",
     ],
-    href: "https://github.com/MrxTS/Sproutly",
+    href: "mailto:stng.dev@proton.me?subject=Sproutly%20%E2%80%94%20code%20request",
+    cta: "Private · request code",
   },
   {
     number: "03",
@@ -51,6 +54,8 @@ const CARDS: FeatureCard[] = [
       "Traefik · Authentik · CrowdSec",
       "Backrest snapshots, TIG monitoring",
     ],
+    href: "/projects/homelab",
+    cta: "View details",
   },
 ];
 
@@ -204,15 +209,20 @@ function Card({ card, delay }: { card: FeatureCard; delay: number }) {
 
       <div className="mt-auto pt-6">
         {card.href ? (
-          <a
-            href={card.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-xs text-primary transition-opacity hover:opacity-80 sm:text-sm"
-          >
-            Learn more
-            <ArrowRight className="h-3.5 w-3.5 -rotate-45" />
-          </a>
+          (() => {
+            const isExternal = /^https?:\/\//.test(card.href);
+            return (
+              <a
+                href={card.href}
+                target={isExternal ? "_blank" : undefined}
+                rel={isExternal ? "noopener noreferrer" : undefined}
+                className="inline-flex items-center gap-2 text-xs text-primary transition-opacity hover:opacity-80 sm:text-sm"
+              >
+                {card.cta ?? "Learn more"}
+                <ArrowRight className="h-3.5 w-3.5 -rotate-45" />
+              </a>
+            );
+          })()
         ) : (
           <span className="inline-flex items-center gap-2 text-xs text-primary/60 sm:text-sm">
             Private

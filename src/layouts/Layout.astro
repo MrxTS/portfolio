@@ -3,13 +3,19 @@ import "../styles/global.css";
 
 interface Props {
   title?: string;
+  description?: string;
+  path?: string;
 }
-const { title = "Stefan Nguyen — Portfolio" } = Astro.props;
+const {
+  title = "Stefan Nguyen — Portfolio",
+  description = "Software Test Engineer & iOS Developer building tools, tests, and self-hosted systems — driven by curiosity to understand how things work from the inside out.",
+  path = "",
+} = Astro.props;
 
-const description =
-  "Software Test Engineer & iOS Developer building tools, tests, and self-hosted systems — driven by curiosity to understand how things work from the inside out.";
 const siteUrl = "https://portfolio.stng.dev";
+const pageUrl = `${siteUrl}${path}`;
 const ogImage = `${siteUrl}/og-image.jpg`;
+const isRoot = path === "";
 ---
 <!DOCTYPE html>
 <html lang="de">
@@ -19,10 +25,10 @@ const ogImage = `${siteUrl}/og-image.jpg`;
     <meta name="description" content={description} />
     <title>{title}</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="canonical" href={siteUrl} />
+    <link rel="canonical" href={pageUrl} />
 
     <meta property="og:type" content="website" />
-    <meta property="og:url" content={siteUrl} />
+    <meta property="og:url" content={pageUrl} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={ogImage} />
@@ -30,7 +36,7 @@ const ogImage = `${siteUrl}/og-image.jpg`;
     <meta property="og:image:height" content="630" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:url" content={siteUrl} />
+    <meta name="twitter:url" content={pageUrl} />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
@@ -43,19 +49,21 @@ const ogImage = `${siteUrl}/og-image.jpg`;
       crossorigin
     />
 
-    <script type="application/ld+json" is:inline set:html={JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "Person",
-      "name": "Stefan Nguyen",
-      "url": siteUrl,
-      "image": ogImage,
-      "jobTitle": "Software Test Engineer & iOS Developer",
-      "description": description,
-      "sameAs": [
-        "https://github.com/MrxTS",
-        "https://www.linkedin.com/in/stefan-nguyen-025776135/"
-      ]
-    })} />
+    {isRoot && (
+      <script type="application/ld+json" is:inline set:html={JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Stefan Nguyen",
+        "url": siteUrl,
+        "image": ogImage,
+        "jobTitle": "Software Test Engineer & iOS Developer",
+        "description": "Software Test Engineer & iOS Developer building tools, tests, and self-hosted systems — driven by curiosity to understand how things work from the inside out.",
+        "sameAs": [
+          "https://github.com/MrxTS",
+          "https://www.linkedin.com/in/stefan-nguyen-025776135/"
+        ]
+      })} />
+    )}
   </head>
   <body class="bg-black text-primary antialiased">
     <slot />
