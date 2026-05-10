@@ -42,8 +42,8 @@ const CARDS: FeatureCard[] = [
       "Real-time activity log",
       "Supabase backend with RLS",
     ],
-    href: "mailto:stng.dev@proton.me?subject=Sproutly%20%E2%80%94%20code%20request",
-    cta: "Private · request code",
+    href: "/projects/sproutly",
+    cta: "View details",
   },
   {
     number: "03",
