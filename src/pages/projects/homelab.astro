@@ -7,8 +7,8 @@ const stack = [
   { label: "Identity", items: ["Authentik (SSO)"] },
   { label: "Storage & Backup", items: ["Synology DSM", "Backrest (file-level)", "Proxmox Backup Server"] },
   { label: "Monitoring", items: ["Telegraf", "InfluxDB", "Grafana", "Uptime-Kuma", "Gatus", "Scrutiny"] },
-  { label: "Apps", items: ["Vaultwarden", "n8n", "Paperless-ngx", "Home Assistant"] },
-  { label: "DNS & Networking", items: ["Technitium", "keepalived (vIP failover)", "WireGuard (VPN)"] },
+  { label: "Apps", items: ["Vaultwarden", "n8n", "Paperless-ngx", "Home Assistant", "Karakeep", "Navidrome", "Stirling-PDF"] },
+  { label: "DNS & Networking", items: ["Technitium", "keepalived (vIP failover)", "WireGuard", "Netbird"] },
   { label: "Hardware / IoT", items: ["Plant Monitor (ADS1115 · I²C)", "Python + systemd"] },
 ];
 
@@ -16,7 +16,7 @@ const highlights = [
   {
     title: "LXC over VMs",
     body:
-      "21 lightweight containers on a single Mini-PC. Memory headroom over isolation cost — works because every workload is mine.",
+      "28 lightweight containers on a single Mini-PC. Memory headroom over isolation cost — works because every workload is mine.",
   },
   {
     title: "Single sign-on by default",
@@ -50,7 +50,7 @@ const architecture = `        Internet
 
 ┌──────────────┐    ┌──────────────┐
 │   MS-01      │───▸│  Synology    │
-│ Proxmox · 21 │    │  DS224+      │
+│ Proxmox · 28 │    │  DS224+      │
 │    LXCs      │    │  (backup)    │
 └──────┬───────┘    └──────────────┘
        │
