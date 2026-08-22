@@ -1,0 +1,11 @@
+{
+  // Statische Astro-Site als Assets-only-Worker.
+  // Ohne diese Datei startet `npx wrangler deploy` im Cloudflare-Build sein
+  // interaktives Setup, ruft `astro add cloudflare` und bricht ab (Deploy failed).
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "portfolio",
+  "compatibility_date": "2026-08-22",
+  "assets": {
+    "directory": "./dist"
+  }
+}
