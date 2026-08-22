@@ -50,9 +50,9 @@ const CARDS: FeatureCard[] = [
     title: "Homelab.",
     Icon: Server,
     items: [
-      "MS-01 Proxmox + Pi backup + DS224+",
-      "Traefik · Authentik · CrowdSec",
-      "Backrest snapshots, TIG monitoring",
+      "2-node Proxmox cluster + Pi + DS224+",
+      "Traefik · Authentik · CrowdSec · NetBird",
+      "PBS + Backrest snapshots, TIG monitoring",
     ],
     href: "/projects/homelab",
     cta: "View details",
