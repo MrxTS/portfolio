@@ -2,21 +2,21 @@
 import Layout from "../../layouts/Layout.astro";
 
 const stack = [
-  { label: "Hypervisor", items: ["Proxmox VE 9"] },
-  { label: "Edge", items: ["Traefik", "CrowdSec", "Let's Encrypt"] },
-  { label: "Identity", items: ["Authentik (SSO)"] },
-  { label: "Storage & Backup", items: ["Synology DSM", "Backrest (file-level)", "Proxmox Backup Server"] },
-  { label: "Monitoring", items: ["Telegraf", "InfluxDB", "Grafana", "Uptime-Kuma", "Gatus", "Scrutiny"] },
-  { label: "Apps", items: ["Vaultwarden", "n8n", "Paperless-ngx", "Home Assistant", "Karakeep", "Navidrome", "Stirling-PDF"] },
-  { label: "DNS & Networking", items: ["Technitium", "keepalived (vIP failover)", "WireGuard", "Netbird"] },
-  { label: "Hardware / IoT", items: ["Plant Monitor (ADS1115 · I²C)", "Python + systemd"] },
+  { label: "Hypervisor", items: ["Proxmox VE 9", "2 nodes · 32 LXCs"] },
+  { label: "Edge", items: ["Traefik v3", "CrowdSec (bouncer plugin)", "Let's Encrypt (DNS-01)", "Cloudflare DDNS"] },
+  { label: "Identity", items: ["Authentik (SSO · OIDC · ForwardAuth)"] },
+  { label: "Storage & Backup", items: ["Synology DSM", "Proxmox Backup Server (2 datastores)", "Backrest / restic"] },
+  { label: "Monitoring", items: ["Telegraf", "InfluxDB", "Grafana", "Uptime-Kuma v2", "Gatus", "Beszel", "Scrutiny", "ntfy"] },
+  { label: "Apps", items: ["Vaultwarden", "n8n", "Paperless-ngx", "Home Assistant", "Forgejo", "Karakeep", "Navidrome", "Audiobookshelf", "CouchDB LiveSync", "Stirling-PDF"] },
+  { label: "DNS & Networking", items: ["Technitium (3-node HA)", "keepalived (vIP failover)", "NetBird (self-hosted mesh)"] },
+  { label: "Ops", items: ["Docker Compose", "Git-tracked configs", "Diun (image updates)", "Weekly automated audit"] },
 ];
 
 const highlights = [
   {
     title: "LXC over VMs",
     body:
-      "28 lightweight containers on a single Mini-PC. Memory headroom over isolation cost — works because every workload is mine.",
+      "32 lightweight containers across two Proxmox nodes. Memory headroom over isolation cost — it works because every workload is mine.",
   },
   {
     title: "Single sign-on by default",
@@ -26,59 +26,88 @@ const highlights = [
   {
     title: "DNS that survives the host",
     body:
-      "Technitium runs on the Mini-PC and on a Raspberry Pi. keepalived hands a virtual IP between them — if the primary dies, name resolution keeps working long enough to fix it.",
+      "Technitium runs on three machines — Mini-PC, Raspberry Pi, ThinkPad node — with zone transfer from a single master. keepalived hands one virtual IP down the priority chain, so name resolution outlives any single box.",
   },
   {
     title: "Backups I actually trust",
     body:
-      "Two layers: Backrest takes file-level snapshots to the Synology, Proxmox Backup Server handles block-level CT/VM snapshots. Restore-tested, not just scheduled.",
+      "Proxmox Backup Server keeps a hot datastore on NVMe and syncs deduplicated to a cold one on the Synology; Backrest adds file-level restic snapshots. Restore drills run monthly — scheduled backups without a tested restore are a rumour.",
+  },
+  {
+    title: "Second node, not a bigger one",
+    body:
+      "An old ThinkPad became the second Proxmox node. Same-VMID, same-IP container moves meant zero reverse-proxy changes, and the RAM pressure on the Mini-PC disappeared.",
+  },
+  {
+    title: "Mesh instead of a VPN box",
+    body:
+      "Self-hosted NetBird replaced the WireGuard tunnel. Peers talk directly, auth goes through Authentik via OIDC, and remote access no longer depends on one port-forward staying open.",
   },
 ];
 
-const architecture = `        Internet
-           │
-       ┌───▼───────┐
-       │  Traefik  │  ← TLS · CrowdSec WAF
-       └───┬───────┘
-           │
-   ┌───────┼────────────┐
-   ▼       ▼            ▼
-┌─────────┐ ┌──────┐ ┌──────────────┐
-│Authentik│ │ Apps │ │ Home Assistant│
-│  (SSO)  │ │      │ │               │
-└─────────┘ └──────┘ └──────────────┘
+const architecture = `                      Internet
+                         │
+                    ┌────▼─────┐
+                    │ Traefik  │ ← TLS (DNS-01) · CrowdSec · Authentik
+                    └────┬─────┘
+        ┌────────────────┴────────────────┐
+        ▼                                 ▼
+┌──────────────────┐              ┌──────────────────┐
+│   MS-01          │              │   P52s ThinkPad  │
+│   Proxmox 9      │              │   Proxmox 9      │
+│   18 LXCs        │              │   14 LXCs        │
+│                  │              │                  │
+│ traefik · authen-│              │ forgejo · arr    │
+│ tik · vaultwarden│              │ paperless · nav- │
+│ n8n · netbird ·  │              │ idrome · audio-  │
+│ observability    │              │ bookshelf · sure │
+└───┬──────────┬───┘              └────────┬─────────┘
+    │          │                           │
+    │ PBS sync │                           │
+    ▼          │                           │
+┌──────────┐   │                           │
+│ Synology │   │                           │
+│  DS224+  │   │                           │
+│ NFS·cold │   │                           │
+└──────────┘   │                           │
+               │   Technitium DNS · zone transfer
+               ├───────────────┬───────────┘
+               ▼               ▼
+      ┌────────────────┐  ┌──────────────┐
+      │ Raspberry Pi 4 │  │ tech3 (P52s) │
+      │  DNS secondary │  │ DNS tertiary │
+      └────────────────┘  └──────────────┘
+               keepalived vIP · 110 → 90 → 80
 
-┌──────────────┐    ┌──────────────┐
-│   MS-01      │───▸│  Synology    │
-│ Proxmox · 28 │    │  DS224+      │
-│    LXCs      │    │  (backup)    │
-└──────┬───────┘    └──────────────┘
-       │
-       │ keepalived vIP
-       ▼
-┌──────────────┐
-│ Raspberry Pi │
-│  Technitium  │
-│  keepalived  │
-│  WireGuard   │
-│  Plant Mon.  │
-└──────┬───────┘
-       │
-       │ I²C soil-moisture
-       ▼
-   ADS1115 sensor → InfluxDB (plant_monitoring)`;
+     NetBird mesh overlays all four hosts + mobile peers`;
 
-const traefikSnippet = `# Every app gets the same chain: TLS → SSO → WAF
-labels:
-  - traefik.enable=true
-  - traefik.http.routers.app.rule=Host(\`app.example.dev\`)
-  - traefik.http.routers.app.entrypoints=websecure
-  - traefik.http.routers.app.tls.certresolver=letsencrypt
-  - traefik.http.routers.app.middlewares=authentik@file,crowdsec@file`;
+const traefikSnippet = `# Services live in their own LXCs, so routing is file-provider,
+# not container labels. Same three-step chain for every host.
+http:
+  routers:
+    it-tools:
+      rule: "Host(\`tools.stng.dev\`)"
+      entryPoints: [websecure]
+      service: it-tools
+      tls:
+        certResolver: cloudflare      # wildcard via DNS-01
+        domains:
+          - main: stng.dev
+            sans: ["*.stng.dev"]
+      middlewares:
+        - secure-headers@file
+        - internal-only@file          # LAN + mesh only
+        - authentik@file              # ForwardAuth → SSO
+  services:
+    it-tools:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.178.160:8080"`;
+
 ---
 <Layout
   title="Homelab — Stefan Nguyen"
-  description="Self-hosted production stack on a Mini-PC: reverse proxy, SSO, monitoring, backups. The infrastructure I run my own services on."
+  description="Self-hosted production stack on a two-node Proxmox cluster: reverse proxy, SSO, HA DNS, monitoring, tested backups. The infrastructure I run my own services on."
   path="/projects/homelab"
   ogImage="/og-homelab.jpg"
 >
@@ -99,9 +128,9 @@ labels:
           Homelab.
         </h1>
         <p class="mt-6 max-w-2xl text-base text-gray-400 sm:text-lg md:text-xl">
-          A self-hosted production stack on a single Mini-PC. Reverse proxy, single sign-on,
-          monitoring, backups — running 24/7 with zero external dependencies for the
-          things I depend on.
+          A self-hosted production stack on a two-node Proxmox cluster. Reverse proxy, single
+          sign-on, highly available DNS, monitoring, tested backups — running 24/7 with zero
+          external dependencies for the things I depend on.
         </p>
         <div class="mt-6 flex flex-wrap gap-2">
           <span class="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs text-emerald-300">
@@ -109,7 +138,7 @@ labels:
             Live
           </span>
           <span class="inline-flex items-center rounded-full border border-white/10 bg-[#212121] px-3 py-1 text-xs text-primary/70">
-            MS-01 · Pi 4 · DS224+
+            MS-01 · P52s · Pi 4 · DS224+
           </span>
         </div>
       </header>
@@ -141,11 +170,13 @@ labels:
         </div>
         <p class="mt-6 max-w-3xl text-sm text-gray-400 md:text-base">
           One ingress point, one identity layer, one monitoring stack. Every web service routes
-          through Traefik with Let's Encrypt + CrowdSec, then through Authentik for SSO. Internal
-          DNS lives on a primary node and a Raspberry Pi backup with a shared virtual IP — if the
-          Mini-PC reboots, resolution doesn't. Remote access is a WireGuard tunnel into the Pi;
-          a soil-moisture sensor on the same Pi feeds time-series data into the InfluxDB on
-          MS-01 — small reminder that the lab is also hardware.
+          through Traefik with a Let's Encrypt wildcard (DNS-01) and a CrowdSec bouncer, then
+          through Authentik for SSO. Workloads are split across two Proxmox nodes — a Mini-PC and
+          a repurposed ThinkPad — so the memory-hungry stacks stopped competing with each other.
+          Internal DNS is a three-node Technitium setup: one master, two secondaries fed by zone
+          transfer, one virtual IP handed down a keepalived priority chain. Remote access is a
+          self-hosted NetBird mesh that overlays all four machines; backups run block-level to a
+          hot NVMe datastore and sync deduplicated to the Synology overnight.
         </p>
       </section>
 
@@ -164,8 +195,8 @@ labels:
       <section class="mt-16 md:mt-24">
         <h2 class="text-xs uppercase tracking-[0.2em] text-gray-500">Code excerpt</h2>
         <p class="mt-4 max-w-2xl text-sm text-gray-400 md:text-base">
-          The shape of every container's <code class="font-mono text-primary/80">docker-compose.yml</code>.
-          One label-block, three middlewares, full chain.
+          One router file per service in <code class="font-mono text-primary/80">traefik/config/</code>.
+          Wildcard cert, network scope, SSO — the same three middlewares on every host.
         </p>
         <div class="mt-6 overflow-x-auto rounded-2xl bg-[#0a0a0a] p-5 md:p-7">
           <pre class="font-mono text-[11px] leading-relaxed text-primary/80 sm:text-xs md:text-sm">{traefikSnippet}</pre>
