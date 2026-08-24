@@ -1,0 +1,12 @@
+{
+  "generated": "2026-08-23T16:06:21Z",
+  "nodes": 2,
+  "containers_running": 32,
+  "containers_total": 32,
+  "vms": 2,
+  "node_boot_oldest": "2026-05-28T14:48:40Z",
+  "node_boot_newest": "2026-07-30T13:25:30Z",
+  "backup_guests": 33,
+  "backup_snapshots": 295,
+  "backup_newest": "2026-08-23T01:04:40Z"
+}

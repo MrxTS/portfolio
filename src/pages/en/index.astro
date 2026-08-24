@@ -1,0 +1,10 @@
+---
+import FlightLayout from "../../layouts/FlightLayout.astro";
+import Flight from "../../components/Flight.astro";
+import { flight } from "../../content/flight";
+
+const copy = flight.en;
+---
+<FlightLayout copy={copy} path="/en/">
+  <Flight copy={copy} />
+</FlightLayout>

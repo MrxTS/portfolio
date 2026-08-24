@@ -1,0 +1,475 @@
+---
+/**
+ * Der Flug: eine durchgehende Welt, durch die gescrollt wird.
+ *
+ * Grammatik "continuous world" (scrollcraft), also zwingend
+ * `data-sc-mode="worldflight"`: EINE fixierte Bühne, alle sechs Beine
+ * gleichzeitig montiert, im Dokumentfluss steht nur der Abstandhalter. Es gibt
+ * hier keine Sektionen und keine Akte — wer eine Sektion braucht, braucht eine
+ * andere Grammatik.
+ *
+ * Die Engine (`/scrollcraft.js`) wird nie verändert. Sie liest `data-sc-*` vom
+ * Markup und schreibt Deckkraft und Playhead; alles andere hier ist eigener
+ * Code.
+ */
+import type { FlightCopy } from "../content/flight";
+import "../styles/fonts-plex.css";
+import "../styles/scrollcraft.css";
+
+interface Props {
+  copy: FlightCopy;
+}
+const { copy } = Astro.props;
+
+// Gewichte in Viewport-Höhen. Ein Tempo über den ganzen Flug:
+// Gewicht / Clipsekunden = 0,30 überall. Bein 4 ist der Peak und hat den
+// längsten Clip (10s) und damit das doppelte Gewicht.
+const legs = [
+  { n: "01", w: 1.5 },
+  { n: "02", w: 1.5 },
+  { n: "03", w: 1.5 },
+  { n: "04", w: 3 },
+  { n: "05", w: 1.5 },
+  { n: "06", w: 1.5 },
+];
+const weights = legs.map((l) => l.w);
+const total = weights.reduce((a, b) => a + b, 0);
+---
+
+<div class="sc-grain" aria-hidden="true"></div>
+
+{/* Die Karte steht VOR der Welt, damit die Navigation in der Tab-Reihenfolge
+    zuerst kommt. Sie ist fixiert, die Position im Dokument ändert an der
+    Darstellung also nichts. */}
+<nav class="map" aria-label={copy.mapLabel}>
+  {copy.waypoints.map((wp, i) => (
+    <button class="map__leg" data-leg={i} type="button">
+      <span class="map__name">{wp.name}</span><span class="map__depth">{wp.depth}</span>
+    </button>
+  ))}
+  <p class="map__scale" id="map-depth">{copy.depthLabel} {copy.waypoints[0].depth}</p>
+  <a class="map__lang" href={copy.otherLang.href} hreflang={copy.otherLang.hreflang}>
+    {copy.otherLang.label}
+  </a>
+</nav>
+
+<div data-sc-mode="worldflight" data-sc-seam="0.16">
+  <div data-sc-world>
+    {legs.map((leg, i) => (
+      <div
+        data-sc-segment
+        data-sc-w={leg.w}
+        data-sc-waypoint={copy.waypoints[i].name}
+      >
+        <img
+          class="sc-world__poster"
+          src={`/flight/p${leg.n}.webp`}
+          alt=""
+          decoding="async"
+          width="1600"
+          height="889"
+        />
+        <video
+          data-sc-src={`/flight/${leg.n}.mp4`}
+          data-sc-src-mobile={`/flight/${leg.n}-m.mp4`}
+          muted
+          playsinline
+        ></video>
+      </div>
+    ))}
+  </div>
+
+  <div data-sc-world-copy>
+    <div class="sc-world__scrim rf-scrim" aria-hidden="true"></div>
+
+    <div class="sc-copy sc-copy--lead" data-sc-copy data-sc-window="hero">
+      <p class="rf-kicker">{copy.hero.kicker}</p>
+      <h1>{copy.hero.heading}</h1>
+      <p>{copy.hero.body}</p>
+    </div>
+
+    <div class="sc-copy sc-copy--lead" data-sc-copy data-sc-window="0.155 0.285 0.22 0.22">
+      <h2 set:html={copy.rack.heading} />
+      <p>{copy.rack.body}</p>
+    </div>
+
+    {/* Bein 3 trägt bewusst keinen Text: das ist die Stille vor dem Peak und
+        kein vergessenes Fenster. */}
+
+    <div class="sc-copy sc-copy--lead" data-sc-copy data-sc-window="0.46 0.72">
+      <h2>{copy.peak.heading}</h2>
+      <p>{copy.peak.body}</p>
+
+      <div class="probe" id="probe">
+        <p class="probe__req">
+          <span><span class="probe__verb">GET</span> /data/pulse.json</span>
+          <span class="probe__ms" id="probe-ms">0&#8239;ms</span>
+        </p>
+        <dl class="probe__out" id="probe-out"></dl>
+        <p class="probe__note" id="probe-note">{copy.peak.waiting}</p>
+      </div>
+    </div>
+
+    <div class="sc-copy sc-copy--lead" data-sc-copy data-sc-window="0.73 0.855 0.22 0.22">
+      <h2 set:html={copy.net.heading} />
+      <p>{copy.net.body}</p>
+    </div>
+
+    <div class="sc-copy sc-copy--lead" data-sc-copy data-sc-window="finale">
+      <h2>{copy.close.heading}</h2>
+      <a class="close__mail" href={`mailto:${copy.close.mail}`}>{copy.close.mail}</a>
+      <p class="close__label">{copy.close.projectsLabel}</p>
+      <ul class="close__list">
+        {copy.close.projects.map((p) => (
+          <li><a href={p.href}>{p.label}</a></li>
+        ))}
+      </ul>
+      <ul class="close__list close__list--quiet">
+        {copy.close.links.map((l) => (
+          <li><a href={l.href} rel="me noopener">{l.label}</a></li>
+        ))}
+      </ul>
+    </div>
+  </div>
+
+  <div data-sc-spacer aria-hidden="true"></div>
+</div>
+
+<script is:inline src="/scrollcraft.js"></script>
+<script is:inline define:vars={{ weights, total, peak: copy.peak, locale: copy.locale, depthLabel: copy.depthLabel }}>
+  (function () {
+    ScrollCraft.mount(document);
+
+    // Der Abstandhalter wird einmal bei mount gemessen. Meldet innerHeight in
+    // dem Moment 0, ist die Spur 0px hoch und der Flug bewegt sich nie — das
+    // scheitert lautlos und sieht aus wie ein Standbild. Ein resize lässt neu
+    // messen; fonts.ready, weil eingewechselte Schrift jede Copy-Höhe ändert.
+    function relayout() { dispatchEvent(new Event("resize")); }
+    addEventListener("load", relayout);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(relayout);
+
+    var root = document.querySelector('[data-sc-mode="worldflight"]');
+    var legs = [].slice.call(document.querySelectorAll(".map__leg"));
+    var depthOut = document.getElementById("map-depth");
+
+    var starts = weights.reduce(function (acc, w, i) {
+      acc.push(i === 0 ? 0 : acc[i - 1] + weights[i - 1]);
+      return acc;
+    }, []);
+
+    legs.forEach(function (el) {
+      el.addEventListener("click", function () {
+        var top = root.getBoundingClientRect().top + scrollY;
+        scrollTo({ top: top + starts[+el.dataset.leg] * innerHeight, behavior: "smooth" });
+      });
+    });
+
+    addEventListener("sc:waypoint", function (e) {
+      legs.forEach(function (el) {
+        el.setAttribute("aria-current", String(+el.dataset.leg === e.detail.index));
+      });
+      if (e.detail.index === 3) probe();
+    });
+
+    // Copy-Blöcke, die gerade unsichtbar sind, dürfen den Fokus nicht annehmen.
+    // Die Engine gibt oberhalb von 0,5 Deckkraft die Zeigerereignisse zurück;
+    // dieselbe Schwelle gilt hier für die Tastatur, sonst springt der Fokus auf
+    // einen Link, den niemand sehen kann.
+    var copyBlocks = [].slice.call(document.querySelectorAll("[data-sc-copy]"));
+    function gateFocus() {
+      copyBlocks.forEach(function (el) {
+        var visible = parseFloat(getComputedStyle(el).opacity) > 0.5;
+        if (visible) el.removeAttribute("inert");
+        else if (!el.contains(document.activeElement)) el.setAttribute("inert", "");
+      });
+    }
+
+    // Nicht im Scroll-Ereignis prüfen: die Engine schreibt die Deckkraft in
+    // ihrem eigenen rAF-Tick, die Messung läge dort immer einen Frame zurück.
+    var gateUntil = 0, gateRunning = false;
+    function gateSoon() {
+      gateUntil = performance.now() + 700;
+      if (gateRunning) return;
+      gateRunning = true;
+      (function loop() {
+        gateFocus();
+        if (performance.now() < gateUntil) requestAnimationFrame(loop);
+        else gateRunning = false;
+      })();
+    }
+    gateSoon();
+
+    addEventListener("scroll", function () {
+      var top = root.getBoundingClientRect().top + scrollY;
+      var t = Math.min(Math.max((scrollY - top) / innerHeight, 0), total);
+      depthOut.textContent = depthLabel + " " + t.toFixed(1).replace(".", locale === "de-DE" ? "," : ".");
+      gateSoon();
+    }, { passive: true });
+
+    // ── Signature Move: die Anfrage ──────────────────────────────────────
+    // Der ganze Umlauf ist sichtbar, nicht nur sein Ergebnis. Der Zähler läuft
+    // in echter Zeit, so lange es eben dauert. Ein Fehlschlag wird angezeigt.
+    var fired = false;
+    function probe() {
+      if (fired) return;
+      fired = true;
+
+      var msOut = document.getElementById("probe-ms");
+      var out = document.getElementById("probe-out");
+      var note = document.getElementById("probe-note");
+      var t0 = performance.now();
+      var running = true;
+
+      function stamp() {
+        msOut.textContent = Math.round(performance.now() - t0).toLocaleString(locale) + " ms";
+      }
+      (function tick() { if (!running) return; stamp(); requestAnimationFrame(tick); })();
+
+      var ctrl = new AbortController();
+      var killer = setTimeout(function () { ctrl.abort(); }, 8000);
+
+      fetch("/data/pulse.json", { cache: "no-store", signal: ctrl.signal })
+        .then(function (r) {
+          if (!r.ok) throw new Error("HTTP " + r.status);
+          return r.json();
+        })
+        .then(function (d) {
+          clearTimeout(killer); running = false; stamp();
+
+          var rows = [
+            [peak.rows.nodes, String(d.nodes)],
+            [peak.rows.containers, d.containers_running + " " + peak.ofWord + " " + d.containers_total],
+            [peak.rows.vms, String(d.vms)],
+            [peak.rows.snapshots, Number(d.backup_snapshots).toLocaleString(locale)],
+          ];
+          rows.forEach(function (r, i) {
+            var row = document.createElement("div");
+            row.className = "probe__row";
+            var dt = document.createElement("dt");
+            var dd = document.createElement("dd");
+            dt.textContent = r[0];
+            dd.textContent = r[1];
+            row.append(dt, dd);
+            out.appendChild(row);
+            setTimeout(function () { row.classList.add("is-in"); }, 60 + i * 70);
+          });
+
+          var mins = Math.max(0, Math.round((Date.now() - Date.parse(d.generated)) / 60000));
+          note.textContent = "";
+          note.append(peak.sourceBefore);
+          var b = document.createElement("b");
+          b.textContent = mins < 60
+            ? mins + " " + peak.minutes
+            : Math.round(mins / 60) + " " + peak.hours;
+          note.append(b, peak.sourceAfter);
+        })
+        .catch(function (err) {
+          clearTimeout(killer); running = false;
+          note.textContent = err.name === "AbortError"
+            ? peak.timeout
+            : peak.failed + err.message;
+        });
+    }
+  })();
+</script>
+
+<style is:global>
+  :root {
+    --sc-canvas:     #070A0C;
+    --sc-surface:    #0E141A;
+    --sc-ink:        #E8EDF2;
+    --sc-ink-soft:   #93A2AE;
+    --sc-accent:     #FFA733;
+    --sc-accent-ink: #0A0D10;
+    --sc-font-display: "IBM Plex Sans", system-ui, sans-serif;
+    --sc-font-text:    "IBM Plex Sans", system-ui, sans-serif;
+
+    --rf-mono: "IBM Plex Mono", ui-monospace, monospace;
+    --rf-rule: color-mix(in oklab, var(--sc-ink) 16%, transparent);
+  }
+
+  html { background: var(--sc-canvas); }
+  body { background: var(--sc-canvas); color: var(--sc-ink); margin: 0; }
+
+  /* ── Die Karte ─────────────────────────────────────────────────────────
+     Rechts, nicht links: .sc-copy--lead ist am linken Gutter verankert und
+     läuft bis 46rem. Eine linke Karte lag unter der Schlagzeile. */
+  .map {
+    position: fixed; z-index: 4;
+    right: 0; top: 50%; translate: 0 -50%;
+    padding: 2.7rem var(--sc-gutter) 2.7rem 3.5rem;
+    font-family: var(--rf-mono);
+    font-size: 0.72rem; letter-spacing: 0.06em;
+    display: grid; gap: 0; text-align: right;
+    isolation: isolate;
+  }
+  /* Eigene Dichte: die Kontrastmessung der scrollcraft-Harness bewertet nur
+     [data-sc-copy], nicht diese Navigation. Über den hellen Panels in Bein 5
+     und 6 war sie ohne Platte nicht lesbar (gemessen 1,06:1, jetzt 6,40:1).
+     Die Dichte bleibt über die volle Textbreite konstant und läuft erst in der
+     linken Polsterung aus.
+     Der Grund liegt auf einem Pseudoelement, damit die vertikale Maske nur ihn
+     ausblendet und nicht die Schrift; ohne sie las sich die Platte als
+     aufgeklebtes Rechteck mit harten Kanten. */
+  .map::before {
+    content: ""; position: absolute; inset: 0; z-index: -1;
+    background: linear-gradient(270deg,
+      color-mix(in oklab, var(--sc-canvas) 92%, transparent) 0%,
+      color-mix(in oklab, var(--sc-canvas) 92%, transparent) 80%,
+      transparent 100%);
+    -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 15%, #000 85%, transparent 100%);
+    mask-image: linear-gradient(180deg, transparent 0%, #000 15%, #000 85%, transparent 100%);
+  }
+  .map__leg {
+    display: grid; grid-template-columns: 1fr auto; align-items: center;
+    gap: 0.7rem; padding: 0.42rem 0;
+    background: none; border: 0; text-align: right;
+    color: var(--sc-ink-soft); cursor: pointer;
+    font: inherit;
+    transition: color 160ms var(--sc-ease-out);
+  }
+  .map__depth { font-variant-numeric: tabular-nums; opacity: 0.62; }
+  .map__name  { position: relative; padding-right: 0.9rem; }
+  .map__name::after {
+    content: ""; position: absolute; right: 0; top: 50%; translate: 0 -50%;
+    width: 0.42rem; height: 1px; background: currentColor; opacity: 0.5;
+    transition: opacity 220ms var(--sc-ease-out);
+  }
+  .map__leg[aria-current="true"] { color: var(--sc-accent); }
+  .map__leg[aria-current="true"] .map__name::after { opacity: 1; }
+  .map__leg:hover { color: var(--sc-ink); }
+  .map__leg:focus-visible { outline: 2px solid var(--sc-accent); outline-offset: 3px; }
+  .map__scale {
+    margin: 0.9rem 0 0; padding-top: 0.7rem;
+    border-top: 1px solid var(--rf-rule);
+    color: var(--sc-ink-soft); font-variant-numeric: tabular-nums;
+  }
+  .map__lang {
+    margin-top: 0.5rem; color: var(--sc-ink-soft); text-decoration: none;
+    border-bottom: 1px solid var(--rf-rule); padding-bottom: 2px;
+    justify-self: end;
+  }
+  .map__lang:hover { color: var(--sc-ink); border-bottom-color: var(--sc-accent); }
+  .map__lang:focus-visible { outline: 2px solid var(--sc-accent); outline-offset: 3px; }
+
+  /* Unter 1025px hat die Copy-Spalte keinen Platz mehr neben der Karte. */
+  @media (max-width: 1024px) {
+    .map {
+      left: 0; right: 0; top: auto; bottom: 0; translate: none;
+      display: flex; align-items: center; gap: 0; overflow-x: auto;
+      text-align: left;
+      padding: 0.5rem var(--sc-gutter) calc(0.5rem + env(safe-area-inset-bottom));
+    }
+    .map::before {
+      background: linear-gradient(0deg,
+        color-mix(in oklab, var(--sc-canvas) 94%, transparent) 45%, transparent);
+      -webkit-mask-image: none; mask-image: none;
+    }
+    .map__leg { grid-template-columns: none; padding: 0.3rem 0.85rem 0.3rem 0; text-align: left; }
+    .map__depth, .map__scale { display: none; }
+    .map__name { padding-right: 0; white-space: nowrap; }
+    .map__name::after { display: none; }
+    .map__lang { margin: 0 0 0 auto; padding-left: 0.85rem; white-space: nowrap; }
+  }
+
+  /* ── Typografie ───────────────────────────────────────────────────────── */
+  .rf-kicker {
+    font-family: var(--rf-mono); font-size: 0.72rem;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--sc-accent); margin: 0 0 var(--sc-4);
+  }
+  [data-sc-copy] h1, [data-sc-copy] h2 {
+    font-family: var(--sc-font-display);
+    font-weight: 600; letter-spacing: var(--sc-track-tight);
+    line-height: 1.02; text-wrap: balance;
+    margin: 0 0 var(--sc-5);
+  }
+  [data-sc-copy] h1 { font-size: var(--sc-t-4xl); }
+  [data-sc-copy] h2 { font-size: var(--sc-t-3xl); }
+  [data-sc-copy] p {
+    font-family: var(--sc-font-text); font-size: var(--sc-t-md);
+    /* Helle Schrift auf dunklem Grund braucht Ausgleich auf drei Achsen:
+       etwas mehr Durchschuss, etwas mehr Laufweite, eine Stufe mehr Gewicht. */
+    line-height: 1.68; letter-spacing: 0.005em; font-weight: 400;
+    color: var(--sc-ink-soft); max-width: 46ch; margin: 0;
+    text-wrap: pretty;
+  }
+  @media (max-width: 700px) {
+    [data-sc-copy] h1 { font-size: var(--sc-t-2xl); }
+    [data-sc-copy] h2 { font-size: var(--sc-t-xl); }
+  }
+
+  /* ── Signature Move: die Anfrage ──────────────────────────────────────── */
+  .probe {
+    font-family: var(--rf-mono); font-size: 0.8rem; line-height: 1.5;
+    margin-top: var(--sc-6);
+    border-top: 1px solid var(--rf-rule); padding-top: var(--sc-4);
+    max-width: 34rem;
+  }
+  .probe__req { display: flex; gap: 1.2rem; align-items: baseline; color: var(--sc-ink); margin: 0; }
+  .probe__verb { color: var(--sc-accent); }
+  .probe__ms { margin-left: auto; font-variant-numeric: tabular-nums; color: var(--sc-ink-soft); }
+  .probe__out { margin: var(--sc-4) 0 0; display: grid; gap: 0.28rem; }
+  .probe__row {
+    display: grid; grid-template-columns: 1fr auto; gap: 1.2rem; align-items: baseline;
+    opacity: 0; transform: translateY(3px);
+    transition: opacity 200ms var(--sc-ease-out), transform 200ms var(--sc-ease-out);
+  }
+  .probe__row.is-in { opacity: 1; transform: none; }
+  .probe__row dt { color: var(--sc-ink-soft); }
+  .probe__row dd { margin: 0; color: var(--sc-ink); font-variant-numeric: tabular-nums; }
+  .probe__note { margin: var(--sc-4) 0 0; color: var(--sc-ink-soft); font-size: 0.74rem; }
+  .probe__note b { color: var(--sc-accent); font-weight: 500; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .probe__row { transition: none; opacity: 1; transform: none; }
+  }
+
+  /* ── Schluss ──────────────────────────────────────────────────────────── */
+  .close__mail {
+    display: inline-block; font-family: var(--rf-mono);
+    font-size: var(--sc-t-lg); color: var(--sc-ink);
+    text-decoration: underline;
+    text-underline-offset: 0.28em; text-decoration-thickness: 1px;
+    text-decoration-color: var(--sc-accent);
+    margin: 0 0 var(--sc-6);
+    transition: color 140ms var(--sc-ease-out);
+  }
+  .close__mail:hover { color: var(--sc-accent); }
+  .close__mail:focus-visible { outline: 2px solid var(--sc-accent); outline-offset: 4px; }
+  .close__label {
+    font-family: var(--rf-mono); font-size: 0.7rem;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--sc-ink-soft); margin: 0 0 var(--sc-3) !important;
+  }
+  .close__list {
+    font-family: var(--rf-mono); font-size: 0.82rem;
+    display: flex; gap: 1.4rem; flex-wrap: wrap;
+    padding: 0; margin: 0 0 var(--sc-4); list-style: none;
+  }
+  .close__list--quiet { font-size: 0.75rem; margin-bottom: 0; }
+  .close__list a {
+    color: var(--sc-ink); text-decoration: none;
+    border-bottom: 1px solid var(--rf-rule); padding-bottom: 2px;
+    transition: color 140ms var(--sc-ease-out), border-color 140ms var(--sc-ease-out);
+  }
+  .close__list--quiet a { color: var(--sc-ink-soft); }
+  .close__list a:hover { color: var(--sc-accent); border-bottom-color: var(--sc-accent); }
+  .close__list a:focus-visible { outline: 2px solid var(--sc-accent); outline-offset: 3px; }
+
+  /* Ein Scrim nur dort, wo Text sitzt. Kein Vollbild-Overlay: das Band endet
+     bei 64% und lässt die obere Bildhälfte unangetastet, die Ecke legt die
+     Dichte dorthin, wo der Satz wirklich steht. Gemessen, nicht geschätzt —
+     der Peak lag mit der ersten Fassung bei 1,71:1. */
+  .rf-scrim {
+    background:
+      linear-gradient(0deg,
+        color-mix(in oklab, var(--sc-canvas) 90%, transparent) 0%,
+        color-mix(in oklab, var(--sc-canvas) 62%, transparent) 34%,
+        transparent 64%),
+      radial-gradient(125% 105% at 0% 100%,
+        color-mix(in oklab, var(--sc-canvas) 97%, transparent) 0%,
+        color-mix(in oklab, var(--sc-canvas) 84%, transparent) 46%,
+        transparent 82%);
+  }
+</style>
