@@ -358,10 +358,7 @@ const total = weights.reduce((a, b) => a + b, 0);
       left: 0; right: 0; top: auto; bottom: 0; translate: none;
       display: flex; align-items: center; gap: 0; overflow-x: auto;
       text-align: left;
-      /* Rechts keine Polsterung: der Sprachlink klebt per sticky am Rand und
-         trägt sie selbst, sonst bliebe ein Streifen, durch den Beinnamen
-         hinter ihm vorbeilaufen. */
-      padding: 0.5rem 0 calc(0.5rem + env(safe-area-inset-bottom)) var(--sc-gutter);
+      padding: 0.5rem var(--sc-gutter) calc(0.5rem + env(safe-area-inset-bottom));
     }
     .map::before {
       background: linear-gradient(0deg,
@@ -372,23 +369,23 @@ const total = weights.reduce((a, b) => a + b, 0);
     .map__depth, .map__scale { display: none; }
     .map__name { padding-right: 0; white-space: nowrap; }
     .map__name::after { display: none; }
-    /* Die sechs Beine sind zusammen 462px breit, ein Telefon ist es nicht: die
-       Leiste läuft über, und margin-left:auto schiebt den Sprachlink hinter den
-       rechten Rand — erreichbar nur nach seitlichem Wischen. sticky hält ihn im
-       Bild; der eigene Grund verhindert, dass Beinnamen unter ihm durchlaufen.
-       Die Deckung endet genau dort, wo die Polsterung anfängt, und nicht bei
-       einem Anteil der Breite: sonst liegt die erste Silbe im Verlauf und der
-       Beinname darunter liest sich mit — auf dem Gerät stand da "DEnglish".
-       In Prozent ginge das schief, weil "English" und "Deutsch" verschieden
-       breit sind. */
+    /* Der Sprachlink verlässt die Leiste. In ihr war er unbrauchbar: die sechs
+       Beine sind zusammen 462px breit, die Leiste läuft also über, und am Ende
+       eines Scrollbereichs landete er als 22px hoher Streifen 11px über der
+       Unterkante — dort, wo auf dem Telefon Browserleiste und Home-Indicator
+       sitzen. Tippen funktionierte, treffen und erkennen nicht.
+       Oben rechts ist über allen sechs Beinen frei, weil die Copy unten links
+       ankert. Eigene Platte statt Verlauf, damit er über hellen Frames trägt,
+       und 44px hoch als Tippziel. */
     .map__lang {
-      position: sticky; right: 0;
-      margin: 0 0 0 auto; white-space: nowrap;
-      padding-left: 2rem; padding-right: var(--sc-gutter);
-      background: linear-gradient(270deg,
-        var(--sc-canvas) 0%,
-        var(--sc-canvas) calc(100% - 2rem),
-        transparent 100%);
+      position: fixed; z-index: 5;
+      top: calc(env(safe-area-inset-top) + 0.9rem);
+      right: var(--sc-gutter);
+      display: inline-flex; align-items: center;
+      min-height: 44px; padding: 0 0.95rem; margin: 0;
+      background: var(--sc-canvas);
+      border: 1px solid var(--rf-rule); border-radius: 2px;
+      color: var(--sc-ink); white-space: nowrap;
     }
   }
 
