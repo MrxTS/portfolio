@@ -375,13 +375,20 @@ const total = weights.reduce((a, b) => a + b, 0);
     /* Die sechs Beine sind zusammen 462px breit, ein Telefon ist es nicht: die
        Leiste läuft über, und margin-left:auto schiebt den Sprachlink hinter den
        rechten Rand — erreichbar nur nach seitlichem Wischen. sticky hält ihn im
-       Bild; der eigene Grund verhindert, dass Beinnamen unter ihm durchlaufen. */
+       Bild; der eigene Grund verhindert, dass Beinnamen unter ihm durchlaufen.
+       Die Deckung endet genau dort, wo die Polsterung anfängt, und nicht bei
+       einem Anteil der Breite: sonst liegt die erste Silbe im Verlauf und der
+       Beinname darunter liest sich mit — auf dem Gerät stand da "DEnglish".
+       In Prozent ginge das schief, weil "English" und "Deutsch" verschieden
+       breit sind. */
     .map__lang {
       position: sticky; right: 0;
       margin: 0 0 0 auto; white-space: nowrap;
-      padding-left: 1.4rem; padding-right: var(--sc-gutter);
+      padding-left: 2rem; padding-right: var(--sc-gutter);
       background: linear-gradient(270deg,
-        var(--sc-canvas) 0%, var(--sc-canvas) 55%, transparent 100%);
+        var(--sc-canvas) 0%,
+        var(--sc-canvas) calc(100% - 2rem),
+        transparent 100%);
     }
   }
 
